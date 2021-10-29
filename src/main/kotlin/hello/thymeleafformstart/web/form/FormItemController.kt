@@ -56,6 +56,7 @@ class FormItemController @Autowired constructor (private val itemRepository: Ite
 
   @PostMapping("/{itemId}/edit")
   fun edit(@PathVariable itemId: Long, @ModelAttribute item: Item): String {
+
     itemRepository.update(itemId, item)
     return "redirect:/form/items/{itemId}"
   }

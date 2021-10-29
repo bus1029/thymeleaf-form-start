@@ -32,6 +32,10 @@ class ItemRepository {
       findItem.itemName = updateParam.itemName
       findItem.price = updateParam.price
       findItem.quantity = updateParam.quantity
+      findItem.open = updateParam.open
+      findItem.regions = updateParam.regions
+      findItem.itemType = updateParam.itemType
+      findItem.deliveryCode = updateParam.deliveryCode
     }
   }
 
