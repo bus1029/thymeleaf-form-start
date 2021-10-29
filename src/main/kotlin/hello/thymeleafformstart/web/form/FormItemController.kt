@@ -15,6 +15,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes
 class FormItemController @Autowired constructor (private val itemRepository: ItemRepository) {
   var logger: Logger = LoggerFactory.getLogger(FormItemController::class.java)
 
+  @ModelAttribute("regions")
+  private fun regions(): Map<String, String> {
+    val regions = LinkedHashMap<String, String>();
+    regions["SEOUL"] = "서울"
+    regions["BUSAN"] = "부산"
+    regions["JEJU"] = "제주"
+    return regions
+  }
+
   @GetMapping
   fun items(model: Model): String {
     val items = itemRepository.findAll()
@@ -39,6 +48,7 @@ class FormItemController @Autowired constructor (private val itemRepository: Ite
   fun addItem(@ModelAttribute item: Item, redirectAttribute: RedirectAttributes): String {
     // Item (class name) -> item
     logger.info("item.open={}", item.open)
+    logger.info("item.regions={}", item.regions)
 
     val savedItem = itemRepository.save(item)
     redirectAttribute.addAttribute("itemId", savedItem.id)
