@@ -27,7 +27,8 @@ class FormItemController @Autowired constructor (private val itemRepository: Ite
   }
 
   @GetMapping("/add")
-  fun addForm(): String {
+  fun addForm(model: Model): String {
+    model.addAttribute("item", Item())
     return "form/addForm"
   }
 
