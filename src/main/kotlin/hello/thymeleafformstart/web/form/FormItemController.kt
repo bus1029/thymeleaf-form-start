@@ -1,5 +1,6 @@
 package hello.thymeleafformstart.web.form
 
+import hello.thymeleafformstart.domain.item.DeliveryCode
 import hello.thymeleafformstart.domain.item.Item
 import hello.thymeleafformstart.domain.item.ItemRepository
 import hello.thymeleafformstart.domain.item.ItemType
@@ -30,6 +31,15 @@ class FormItemController @Autowired constructor (private val itemRepository: Ite
     return ItemType.values()
   }
 
+  @ModelAttribute("deliveryCodes")
+  fun deliveryCodes(): List<DeliveryCode> {
+    return listOf(
+      DeliveryCode("FAST", "빠른 배송"),
+      DeliveryCode("NORMAL", "일반 배송"),
+      DeliveryCode("SLOW", "느린 배송")
+    )
+  }
+
   @GetMapping
   fun items(model: Model): String {
     val items = itemRepository.findAll()
@@ -56,6 +66,7 @@ class FormItemController @Autowired constructor (private val itemRepository: Ite
     logger.info("item.open={}", item.open)
     logger.info("item.regions={}", item.regions)
     logger.info("item.itemType={}", item.itemType)
+    logger.info("item.deliveryCode={}", item.deliveryCode)
 
     val savedItem = itemRepository.save(item)
     redirectAttribute.addAttribute("itemId", savedItem.id)
