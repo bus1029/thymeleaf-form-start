@@ -2,6 +2,7 @@ package hello.thymeleafformstart.web.form
 
 import hello.thymeleafformstart.domain.item.Item
 import hello.thymeleafformstart.domain.item.ItemRepository
+import hello.thymeleafformstart.domain.item.ItemType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,6 +23,11 @@ class FormItemController @Autowired constructor (private val itemRepository: Ite
     regions["BUSAN"] = "부산"
     regions["JEJU"] = "제주"
     return regions
+  }
+
+  @ModelAttribute("itemTypes")
+  fun itemTypes(): Array<ItemType> {
+    return ItemType.values()
   }
 
   @GetMapping
@@ -49,6 +55,7 @@ class FormItemController @Autowired constructor (private val itemRepository: Ite
     // Item (class name) -> item
     logger.info("item.open={}", item.open)
     logger.info("item.regions={}", item.regions)
+    logger.info("item.itemType={}", item.itemType)
 
     val savedItem = itemRepository.save(item)
     redirectAttribute.addAttribute("itemId", savedItem.id)
