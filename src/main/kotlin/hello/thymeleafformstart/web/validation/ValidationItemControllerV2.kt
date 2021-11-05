@@ -41,7 +41,7 @@ class ValidationItemControllerV2 constructor(private val itemRepository: ItemRep
   }
 
   @PostMapping("/add")
-  fun addItemV1(@ModelAttribute item: Item, bindingResult: BindingResult, redirectAttributes: RedirectAttributes, model: Model): String {
+  fun addItemV1(@ModelAttribute item: Item?, bindingResult: BindingResult, redirectAttributes: RedirectAttributes, model: Model): String {
     checkValidation(item, bindingResult)
     // 검증에 실패하면 다시 입력 폼으로
     if (bindingResult.hasErrors()) {
@@ -49,29 +49,34 @@ class ValidationItemControllerV2 constructor(private val itemRepository: ItemRep
       return "validation/v2/addForm"
     }
 
-    val savedItem = itemRepository.save(item)
-    redirectAttributes.addAttribute("itemId", savedItem.id)
-    redirectAttributes.addAttribute("status", true)
+    item?.let {
+      val savedItem = itemRepository.save(item)
+      redirectAttributes.addAttribute("itemId", savedItem.id)
+      redirectAttributes.addAttribute("status", true)
+    }
+
     return "redirect:/validation/v2/items/{itemId}"
   }
 
-  private fun checkValidation(item: Item, bindingResult: BindingResult) {
-    // 검증 로직
-    if (!StringUtils.hasText(item.itemName)) {
-      bindingResult.addError(FieldError("item", "itemName", "상품 이름은 필수입니다."))
-    }
-    // price 의 기본값으로 -1 을 세팅했기 때문에 null 체크는 무시
-    if (item.price < 1000 || item.price > 1000000) {
-      bindingResult.addError(FieldError("item", "price", "가격은 1,000 ~ 1,000,000 까지 허용합니다."))
-    }
+  private fun checkValidation(item: Item?, bindingResult: BindingResult) {
+    item?.let {
+      // 검증 로직
+      if (!StringUtils.hasText(item.itemName)) {
+        bindingResult.addError(FieldError("item", "itemName", "상품 이름은 필수입니다."))
+      }
+      // price 의 기본값으로 -1 을 세팅했기 때문에 null 체크는 무시
+      if (item.price < 1000 || item.price > 1000000) {
+        bindingResult.addError(FieldError("item", "price", "가격은 1,000 ~ 1,000,000 까지 허용합니다."))
+      }
 
-    if (item.quantity >= 9999) {
-      bindingResult.addError(FieldError("item", "quantity", "수량은 최대 9,999 까지 허용합니다."))
-    }
+      if (item.quantity >= 9999) {
+        bindingResult.addError(FieldError("item", "quantity", "수량은 최대 9,999 까지 허용합니다."))
+      }
 
-    // 복합 룰 검증
-    if (item.quantity * item.price < 10000) {
-      bindingResult.addError(ObjectError("item", "가격 * 수량의 합은 10,000원 이상이어야 합니다. 현재 값 = ${item.quantity * item.price}"))
+      // 복합 룰 검증
+      if (item.quantity * item.price < 10000) {
+        bindingResult.addError(ObjectError("item", "가격 * 수량의 합은 10,000원 이상이어야 합니다. 현재 값 = ${item.quantity * item.price}"))
+      }
     }
   }
 
