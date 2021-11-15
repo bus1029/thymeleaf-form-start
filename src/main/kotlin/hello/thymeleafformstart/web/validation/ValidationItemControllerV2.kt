@@ -1,9 +1,7 @@
 package hello.thymeleafformstart.web.validation
 
-import hello.thymeleafformstart.domain.item.DeliveryCode
 import hello.thymeleafformstart.domain.item.Item
 import hello.thymeleafformstart.domain.item.ItemRepository
-import hello.thymeleafformstart.domain.item.ItemType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Controller
@@ -190,6 +188,7 @@ class ValidationItemControllerV2 constructor(private val itemRepository: ItemRep
       if (!StringUtils.hasText(item.itemName)) {
         bindingResult.rejectValue("itemName", "required")
       }
+
       // price 의 기본값으로 -1 을 세팅했기 때문에 null 체크는 무시
       if (item.price < 1000 || item.price > 1000000) {
         bindingResult.rejectValue("price", "range", arrayOf(1000, 1000000), null)
