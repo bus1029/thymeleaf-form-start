@@ -10,6 +10,8 @@ import org.springframework.util.StringUtils
 import org.springframework.validation.BindingResult
 import org.springframework.validation.FieldError
 import org.springframework.validation.ObjectError
+import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 
@@ -18,6 +20,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes
 class ValidationItemControllerV2 constructor(private val itemRepository: ItemRepository,
                                              private val itemValidator: ItemValidator) {
   var logger: Logger = LoggerFactory.getLogger(ValidationItemControllerV2::class.java)
+
+  @InitBinder
+  fun init(webDataBinder: WebDataBinder) {
+    webDataBinder.addValidators(itemValidator)
+  }
 
   @GetMapping
   fun items(model: Model): String {
@@ -117,7 +124,7 @@ class ValidationItemControllerV2 constructor(private val itemRepository: ItemRep
     return "redirect:/validation/v2/items/{itemId}"
   }
 
-  @PostMapping("/add")
+//  @PostMapping("/add")
   fun addItemV5(@ModelAttribute item: Item?, bindingResult: BindingResult, redirectAttributes: RedirectAttributes, model: Model): String {
     logger.info("objectName={}", bindingResult.objectName)
     logger.info("target={}", bindingResult.target)
@@ -125,6 +132,26 @@ class ValidationItemControllerV2 constructor(private val itemRepository: ItemRep
     item?.let {
       itemValidator.validate(item, bindingResult);
     }
+    // 검증에 실패하면 다시 입력 폼으로
+    if (bindingResult.hasErrors()) {
+      logger.error("errors = {}", bindingResult)
+      return "validation/v2/addForm"
+    }
+
+    item?.let {
+      val savedItem = itemRepository.save(item)
+      redirectAttributes.addAttribute("itemId", savedItem.id)
+      redirectAttributes.addAttribute("status", true)
+    }
+
+    return "redirect:/validation/v2/items/{itemId}"
+  }
+
+  @PostMapping("/add")
+  fun addItemV6(@Validated @ModelAttribute item: Item?, bindingResult: BindingResult, redirectAttributes: RedirectAttributes, model: Model): String {
+    logger.info("objectName={}", bindingResult.objectName)
+    logger.info("target={}", bindingResult.target)
+
     // 검증에 실패하면 다시 입력 폼으로
     if (bindingResult.hasErrors()) {
       logger.error("errors = {}", bindingResult)
