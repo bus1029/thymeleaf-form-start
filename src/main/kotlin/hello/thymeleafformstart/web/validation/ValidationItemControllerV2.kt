@@ -15,7 +15,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes
 
 @Controller
 @RequestMapping("/validation/v2/items")
-class ValidationItemControllerV2 constructor(private val itemRepository: ItemRepository) {
+class ValidationItemControllerV2 constructor(private val itemRepository: ItemRepository,
+                                             private val itemValidator: ItemValidator) {
   var logger: Logger = LoggerFactory.getLogger(ValidationItemControllerV2::class.java)
 
   @GetMapping
@@ -38,7 +39,7 @@ class ValidationItemControllerV2 constructor(private val itemRepository: ItemRep
     return "validation/v2/addForm"
   }
 
-//  @PostMapping("/add")
+  //  @PostMapping("/add")
   fun addItemV1(@ModelAttribute item: Item?, bindingResult: BindingResult, redirectAttributes: RedirectAttributes, model: Model): String {
     checkValidation(item, bindingResult)
     // 검증에 실패하면 다시 입력 폼으로
@@ -56,7 +57,7 @@ class ValidationItemControllerV2 constructor(private val itemRepository: ItemRep
     return "redirect:/validation/v2/items/{itemId}"
   }
 
-//  @PostMapping("/add")
+  //  @PostMapping("/add")
   fun addItemV2(@ModelAttribute item: Item?, bindingResult: BindingResult, redirectAttributes: RedirectAttributes, model: Model): String {
     checkValidation2(item, bindingResult)
     // 검증에 실패하면 다시 입력 폼으로
@@ -74,7 +75,7 @@ class ValidationItemControllerV2 constructor(private val itemRepository: ItemRep
     return "redirect:/validation/v2/items/{itemId}"
   }
 
-//  @PostMapping("/add")
+  //  @PostMapping("/add")
   fun addItemV3(@ModelAttribute item: Item?, bindingResult: BindingResult, redirectAttributes: RedirectAttributes, model: Model): String {
     logger.info("objectName={}", bindingResult.objectName)
     logger.info("target={}", bindingResult.target)
@@ -95,12 +96,35 @@ class ValidationItemControllerV2 constructor(private val itemRepository: ItemRep
     return "redirect:/validation/v2/items/{itemId}"
   }
 
-  @PostMapping("/add")
+  //  @PostMapping("/add")
   fun addItemV4(@ModelAttribute item: Item?, bindingResult: BindingResult, redirectAttributes: RedirectAttributes, model: Model): String {
     logger.info("objectName={}", bindingResult.objectName)
     logger.info("target={}", bindingResult.target)
 
     checkValidation4(item, bindingResult)
+    // 검증에 실패하면 다시 입력 폼으로
+    if (bindingResult.hasErrors()) {
+      logger.error("errors = {}", bindingResult)
+      return "validation/v2/addForm"
+    }
+
+    item?.let {
+      val savedItem = itemRepository.save(item)
+      redirectAttributes.addAttribute("itemId", savedItem.id)
+      redirectAttributes.addAttribute("status", true)
+    }
+
+    return "redirect:/validation/v2/items/{itemId}"
+  }
+
+  @PostMapping("/add")
+  fun addItemV5(@ModelAttribute item: Item?, bindingResult: BindingResult, redirectAttributes: RedirectAttributes, model: Model): String {
+    logger.info("objectName={}", bindingResult.objectName)
+    logger.info("target={}", bindingResult.target)
+
+    item?.let {
+      itemValidator.validate(item, bindingResult);
+    }
     // 검증에 실패하면 다시 입력 폼으로
     if (bindingResult.hasErrors()) {
       logger.error("errors = {}", bindingResult)
